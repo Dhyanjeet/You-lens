@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>You Lens</title>
+
+  <!-- Playful Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Komika+Axis&display=swap" rel="stylesheet">
+  <!-- Serif Font for Subtext -->
+  <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&display=swap" rel="stylesheet">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    html {
+      font-size: 16px;
+    }
+    body {
+      font-family: 'Komika Axis', cursive;
+      color: white;
+      background-color: #000;
+      overflow-x: hidden;
+      scroll-behavior: smooth;
+    }
+
+    /* Word hover effect */
+    .word {
+      display: inline-block;
+      transition: all 0.3s ease;
+      cursor: default;
+      position: relative;
+      z-index: 1;
+    }
+    .word:hover {
+      transform: scale(1.1);
+      text-shadow: 0 0 5px rgba(255,255,255,0.6), 0 0 15px rgba(255,255,255,0.4);
+      color: #a8f0f0 !important;
+    }
+
+    /* Background Video */
+    .video-background {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: blur(5px);
+      z-index: -2;
+    }
+
+    /* Overlay */
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: -1;
+    }
+
+    /* Hero Content */
+    .hero-content {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      text-align: center;
+      z-index: 2;
+      padding: 0 20px;
+    }
+
+    /* Light Beam */
+    .light-beam {
+      position: absolute;
+      top: 0;
+      left: -75%;
+      width: 50%;
+      height: 100%;
+      background: linear-gradient(
+        transparent 25%,
+        rgba(255, 255, 255, 0.4),
+        transparent 75%
+      );
+      transform: skewX(-25deg);
+      animation: shine 3s infinite ease-in-out;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    @keyframes shine {
+      0% { left: -75% }
+      50% { left: 125% }
+      100% { left: 125% }
+    }
+
+    .title {
+      font-size: clamp(2rem, 8vw, 5rem);
+      font-weight: bold;
+      white-space: nowrap;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 1s ease-out, transform 1s ease-out;
+    }
+
+    .subtitle {
+      font-size: clamp(1rem, 3vw, 1.5rem);
+      color: #ccc;
+      max-width: 90%;
+      margin-top: 20px;
+      opacity: 0;
+      transform: translateY(40px);
+      font-family: 'Merriweather', serif;
+      transition: transform 0.6s ease-out, opacity 0.6s ease-out;
+    }
+
+    /* Scroll Prompt */
+    .scroll-prompt {
+      position: absolute;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: white;
+      font-size: 1rem;
+      text-align: center;
+      z-index: 3;
+      animation: pulse 2s infinite;
+      cursor: pointer;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .arrow {
+      width: 24px;
+      height: 24px;
+      border-right: 2px solid white;
+      border-bottom: 2px solid white;
+      transform: rotate(45deg);
+      margin: 6px auto;
+      animation: arrowMove 2s infinite;
+    }
+
+    @keyframes arrowMove {
+      0%, 100% { transform: translate(0, 0) rotate(45deg); }
+      50% { transform: translate(0, 8px) rotate(45deg); }
+    }
+
+    /* Sections */
+    .new-section, .third-section {
+      min-height: 100vh;
+      padding: 60px 20px;
+      background-color: rgba(0, 0, 0, 0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+    }
+
+    .content-wrapper {
+      max-width: 900px;
+      width: 100%;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 30px;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .text-content, .image-content {
+      flex: 1;
+      max-width: 100%;
+      opacity: 0;
+      transition: all 1s ease-out;
+    }
+
+    .section-title {
+      font-size: 2.2rem;
+      font-weight: bold;
+      margin-bottom: 16px;
+    }
+
+    .section-subtitle {
+      font-family: 'Merriweather', serif;
+      font-size: 1rem;
+      line-height: 1.5;
+      color: #ccc;
+    }
+
+    .image-content img {
+      width: 100%;
+      height: auto;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(255, 255, 255, 0.15);
+    }
+
+    .fade-in {
+      opacity: 1 !important;
+      transform: translateX(0) !important;
+    }
+
+    /* Canvas Section */
+    .third-section {
+      background-color: rgba(0, 0, 0, 0.9);
+      position: relative;
+      overflow: hidden;
+    }
+
+    #floatingCanvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.3;
+    }
+
+    .third-section-content {
+      position: relative;
+      z-index: 2;
+      max-width: 90%;
+      text-align: center;
+    }
+
+    .mute-button {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 40px;
+      height: 40px;
+      border: none;
+      background-color: rgba(255, 255, 255, 0.2);
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+      transition: background-color 0.3s ease;
+    }
+
+    .speaker, .muted {
+      width: 16px;
+      height: 16px;
+      background-color: white;
+      border-radius: 2px;
+      position: relative;
+    }
+
+    .speaker::before, .speaker::after {
+      content: '';
+      position: absolute;
+      background-color: white;
+      height: 5px;
+      width: 2px;
+    }
+
+    .speaker::before {
+      top: 1px;
+      left: -5px;
+      transform: rotate(-45deg);
+    }
+
+    .speaker::after {
+      top: 7px;
+      left: -5px;
+      transform: rotate(45deg);
+    }
+
+    .muted::before, .muted::after {
+      content: '';
+      position: absolute;
+      width: 16px;
+      height: 2px;
+      background-color: red;
+      top: 7px;
+      left: -1px;
+    }
+
+    .muted::before {
+      transform: rotate(45deg);
+    }
+
+    .muted::after {
+      transform: rotate(-45deg);
+    }
+
+    .muted {
+      background-color: red;
+    }
+
+    @media (max-width: 768px) {
+      .title {
+        font-size: 2.5rem;
+      }
+
+      .subtitle {
+        font-size: 1rem;
+      }
+
+      .content-wrapper {
+        flex-direction: column;
+      }
+
+      .section-title {
+        font-size: 2rem;
+      }
+
+      .section-subtitle {
+        font-size: 0.95rem;
+      }
+
+      .scroll-prompt {
+        font-size: 0.9rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Background Video -->
+<video id="backgroundVideo" autoplay loop playsinline muted class="video-background">
+  <source src="Stormy sky.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
+<!-- Overlay -->
+<div class="overlay"></div>
+
+<!-- Hero Content -->
+<div class="hero-content">
+  <div class="light-beam"></div>
+  <h1 class="title" id="pageTitle">
+    <span>You</span><span>Lens</span>
+  </h1>
+  <p class="subtitle" id="heroSubtext">
+    See the world through your own lens, where every photo tells a story.
+  </p>
+  <div class="scroll-prompt" id="scrollPrompt">
+    Scroll down to begin<br/>
+    <div class="arrow"></div>
+  </div>
+</div>
+
+<!-- New Section -->
+<div class="new-section" id="newSection">
+  <div class="content-wrapper">
+    <div class="text-content" id="textContent">
+      <div class="section-title" id="sectionTitle">My Soul Purpose for the WebPage</div>
+      <div class="section-subtitle" id="sectionSubtitle">
+        As a shutterbug, I’ve always viewed the world through my own lens, shaping moments as I see and feel them. While I prefer staying behind the camera, I find joy in capturing raw emotions, editing each frame with care, and pairing it with the perfect song that echoes the story within — and that too after hours of searching for the right lyrics or melody. And so I realized, I can’t be the only one who feels this deep connection between image, emotion, and music. This space is for those who believe a picture can speak the words we struggle to say — feelings too deep to describe, yet captured in a single frame. So join us in this silent photo conversation, where every user portrays their own story through their own self-lens.
+      </div>
+    </div>
+    <div class="image-content" id="imageContent">
+      <img src="hill-station.jpg" alt="Hill Station">
+    </div>
+  </div>
+  <div class="scroll-prompt" id="scrollPromptToThird">
+    Scroll down to next section<br/>
+    <div class="arrow"></div>
+  </div>
+</div>
+
+<!-- Third Section -->
+<section class="third-section" id="thirdSection">
+  <canvas id="floatingCanvas"></canvas>
+  <div class="third-section-content">
+    <h2 id="thirdSectionTitle">You Lens is Made for You</h2>
+    <p id="thirdSectionP1">If you're like me, mindful to a fault and sometimes hesitant...</p>
+    <p id="thirdSectionP2">Each week begins with a unique theme...</p>
+    <p id="thirdSectionP3">And most importantly, do it for yourself...</p>
+  </div>
+</section>
+
+<!-- Mute Button -->
+<button id="mute-toggle" class="mute-button" aria-label="Toggle mute">
+  <span class="speaker"></span>
+</button>
+
+<script>
+  // Wrap words in spans
+  function wrapWordsInSpans(element) {
+    const text = element.textContent.trim();
+    const words = text.split(/\b/);
+    let html = '';
+    words.forEach(word => {
+      if (/\w+/.test(word)) {
+        html += `<span class="word">${word}</span>`;
+      } else {
+        html += word;
+      }
+    });
+    element.innerHTML = html;
+  }
+
+  document.querySelectorAll('.word').forEach(el => el.remove());
+  ['sectionTitle','sectionSubtitle','thirdSectionTitle','thirdSectionP1','thirdSectionP2','thirdSectionP3']
+    .forEach(id => wrapWordsInSpans(document.getElementById(id)));
+
+  // Canvas Flying Images
+  const canvas = document.getElementById('floatingCanvas');
+  const ctx = canvas.getContext('2d');
+  let width = window.innerWidth;
+  let height = window.innerHeight;
+  canvas.width = width;
+  canvas.height = height;
+
+  window.addEventListener('resize', () => {
+    width = window.innerWidth;
+    height = window.innerHeight;
+    canvas.width = width;
+    canvas.height = height;
+  });
+
+  const imageFilenames = [
+    "Lake.png", "Japan.png", "Man with dog.png", "Light bloom.png", "Scenery.png",
+    "cinematic still.png", "Car cinematic.png", "interstellar.png", "Minions.png",
+    "Tom and Jerry.png", "Lone station.png", "cinematic horror.png", "Sheeps.png",
+    "Train station.png", "women in sunview.png", "Mass murder.png",
+    "FLORA-Ash and Pikachu-244ba57f.png", "Doraemon Cafe Scene.png", "cat and girl.png"
+  ];
+
+  const loadedImages = [];
+  imageFilenames.forEach(src => {
+    const img = new Image();
+    img.src = src;
+    img.onload = () => loadedImages.push(img);
+  });
+
+  class FloatingImage {
+    constructor() {
+      this.reset();
+    }
+
+    reset() {
+      const edge = Math.floor(Math.random() * 4);
+      this.size = Math.random() * 150 + 80;
+      switch(edge) {
+        case 0: this.x = Math.random() * width; this.y = -this.size; break;
+        case 1: this.x = width + this.size; this.y = Math.random() * height; break;
+        case 2: this.x = Math.random() * width; this.y = height + this.size; break;
+        case 3: this.x = -this.size; this.y = Math.random() * height; break;
+      }
+      this.vx = (Math.random() - 0.5) * 1.5;
+      this.vy = (Math.random() - 0.5) * 1.5;
+      this.image = loadedImages[Math.floor(Math.random() * loadedImages.length)];
+    }
+
+    update() {
+      this.x += this.vx;
+      this.y += this.vy;
+      if (this.x < -this.size || this.x > width + this.size || this.y < -this.size || this.y > height + this.size) {
+        this.reset();
+      }
+    }
+
+    draw(ctx) {
+      if (!this.image) return;
+      ctx.drawImage(this.image, this.x - this.size / 2, this.y - this.size / 2, this.size, this.size * 0.66);
+    }
+  }
+
+  const floatingImages = Array.from({ length: 30 }, () => new FloatingImage());
+
+  function animate() {
+    ctx.clearRect(0, 0, width, height);
+    floatingImages.forEach(imgObj => {
+      imgObj.update();
+      imgObj.draw(ctx);
+    });
+    requestAnimationFrame(animate);
+  }
+
+  animate();
+
+  // Scroll Buttons
+  document.getElementById('scrollPrompt').addEventListener('click', () => {
+    document.querySelector('.new-section').scrollIntoView({ behavior: 'smooth' });
+  });
+
+  document.getElementById('scrollPromptToThird').addEventListener('click', () => {
+    document.querySelector('.third-section').scrollIntoView({ behavior: 'smooth' });
+  })
+
+  // Audio Enable on Interaction
+  const video = document.getElementById('backgroundVideo');
+  const muteButton = document.getElementById('mute-toggle');
+  const speakerIcon = muteButton.querySelector('.speaker');
+  let hasInteracted = false;
+
+  function enableAudioAndPlay() {
+    if (!hasInteracted) {
+      video.muted = false;
+      video.play().catch(e => console.error("Autoplay failed:", e));
+      hasInteracted = true;
+    }
+  }
+
+  window.addEventListener('touchstart', enableAudioAndPlay, { once: true });
+  window.addEventListener('click', enableAudioAndPlay, { once: true });
+
+  // Mute Toggle
+  let isMuted = false;
+  muteButton.addEventListener('click', () => {
+    isMuted = !isMuted;
+    video.muted = isMuted;
+    speakerIcon.classList.toggle('muted', isMuted);
+  });
+
+  // Fade In Observer
+  const observerOptions = { threshold: 0.1 };
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('fade-in');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, observerOptions);
+
+  observer.observe(document.querySelector('.new-section'));
+
+  // Initial Load Animations
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      document.querySelector('.title').style.opacity = '1';
+      document.querySelector('.title').style.transform = 'translateY(0)';
+      document.querySelector('.title').style.animation = "bounceText 0.6s infinite alternate";
+    }, 300);
+
+    setTimeout(() => {
+      document.querySelector('.subtitle').style.opacity = '1';
+      document.querySelector('.subtitle').style.transform = 'translateY(0)';
+      document.querySelector('.subtitle').style.animation = "bounceText 0.6s infinite alternate";
+    }, 1000);
+  });
+</script>
+</body>
+</html>
